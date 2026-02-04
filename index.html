@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DU EEE - Custom Routine Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --secondary: #7c3aed;
+            --accent: #ec4899;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --bg-light: linear-gradient(135deg, #f0f4ff 0%, #eef2ff 100%);
+            --bg-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .dark-mode {
+            --glass-bg: rgba(30, 41, 59, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --bg-light: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .title h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .title p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .theme-toggle {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--glass-border);
+            transform: rotate(15deg);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glass Panel Styles */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            transition: var(--transition);
+        }
+
+        .glass-panel:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-mode .glass-panel:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .panel-title i {
+            color: var(--primary);
+        }
+
+        /* Group Selection */
+        .group-selection {
+            margin-bottom: 25px;
+        }
+
+        .group-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .dark-mode .group-option {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .group-option:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .group-option.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .group-info h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .group-info p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .group-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .group-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+        }
+
+        .group-btn.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(90deg, var(--secondary), #8b5cf6);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Routine Table */
+        .routine-container {
+            overflow-x: auto;
+        }
+
+        .routine-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        .routine-table th {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 18px 15px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .routine-table td {
+            padding: 16px 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+            vertical-align: top;
+        }
+
+        .time-slot {
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 8px;
+            padding: 8px 5px;
+        }
+
+        .day-cell {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .class-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid var(--primary);
+            transition: var(--transition);
+            text-align: left;
+        }
+
+        .dark-mode .class-card {
+            background: rgba(30, 41, 59, 0.6);
+        }
+
+        .class-card.theory {
+            border-left-color: #10b981;
+        }
+
+        .class-card.lab {
+            border-left-color: #f59e0b;
+        }
+
+        .class-code {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .class-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .class-instructor {
+            font-size: 12px;
+            color: var(--primary);
+            font-style: italic;
+        }
+
+        .empty-slot {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 14px;
+            padding: 20px 0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .cr-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--glass-bg);
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin-top: 15px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .cr-badge i {
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .routine-table th, .routine-table td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header glass-panel">
+            <div class="logo-container">
+                <div class="logo">
+                    DU
+                </div>
+                <div class="title">
+                    <h1>Department of Electrical & Electronic Engineering</h1>
+                    <p>1st Year 2nd Semester B.Sc. (Engg.) 2025 - Custom Routine Generator</p>
+                </div>
+            </div>
+            <div class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Group Selection Panel -->
+            <div class="glass-panel">
+                <div class="panel-title">
+                    <i class="fas fa-users"></i>
+                    <span>Select Your Groups</span>
+                </div>
+                
+                <div class="group-selection">
+                    <div class="group-option" id="physicsGroup">
+                        <div class="group-info">
+                            <h3>Physics Laboratory (0533-PHY-1204)</h3>
+                            <p>Select your Physics Lab group</p>
+                        </div>
+                        <div class="group-selector">
+                            <div class="group-btn" data-group="A">A</div>
+                            <div class="group-btn" data-group="B">B</div>
+                        </div>
+                    </div>
+                    
+                    <div class="group-option" id="chemistryGroup">
+                        <div class="group-info">
+                            <h3>Chemistry Laboratory (0531-CHE-1208)</h3>
+                            <p>Select your Chemistry Lab group</p>
+                        </div>
+                        <div class="group-selector">
+                            <div class="group-btn" data-group="A">A</div>
+                            <div class="group-btn" data-group="B">B</div>
+                        </div>
+                    </div>
+                    
+                    <div class="group-option" id="programmingGroup">
+                        <div class="group-info">
+                            <h3>Computer Programming Lab (0613-CSE-1206)</h3>
+                            <p>Select your Programming Lab group</p>
+                        </div>
+                        <div class="group-selector">
+                            <div class="group-btn" data-group="A">A</div>
+                            <div class="group-btn" data-group="B">B</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="generateRoutine">
+                        <i class="fas fa-calendar-alt"></i>
+                        Generate Routine
+                    </button>
+                    <button class="btn btn-secondary" id="downloadPDF" disabled>
+                        <i class="fas fa-download"></i>
+                        Download PDF
+                    </button>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: rgba(37, 99, 235, 0.05); border-radius: 12px; border-left: 4px solid var(--primary);">
+                    <p style="font-size: 14px; color: var(--text-secondary);"><i class="fas fa-info-circle" style="color: var(--primary); margin-right: 8px;"></i> Your routine will be automatically generated based on your group selections. All theory classes remain the same for everyone. Generate routine at first, then click Download.</p>
+                </div>
+            </div>
+            
+            <!-- Routine Display Panel -->
+            <div class="glass-panel">
+                <div class="panel-title">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>Your Custom Routine</span>
+                </div>
+                
+                <div class="routine-container">
+                    <table class="routine-table" id="routineTable">
+                        <thead>
+                            <tr>
+                                <th>Days / Time</th>
+                                <th>8:30 – 9:55</th>
+                                <th>10:00 – 11:25</th>
+                                <th>11:30 – 12:55</th>
+                                <th>1:30 – 3:00</th>
+                                <th>3:00 – 4:30</th>
+                            </tr>
+                        </thead>
+                        <tbody id="routineBody">
+                            <!-- Routine will be generated here -->
+                            <tr>
+                                <td colspan="6" class="empty-slot">
+                                    <i class="fas fa-calendar-plus" style="font-size: 24px; margin-bottom: 10px; display: block; color: var(--text-secondary);"></i>
+                                    Select your groups and click "Generate Routine" to view your personalized schedule
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--glass-border);">
+                    <div style="display: flex; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div style="width: 12px; height: 12px; background: #10b981; border-radius: 3px;"></div>
+                            <span style="font-size: 12px;">Theory Class</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 3px;"></div>
+                            <span style="font-size: 12px;">Laboratory</span>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">
+                        <i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i>
+                        Theory Classes: New Building (14th floor)
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Department of Electrical & Electronic Engineering, University of Dhaka</p>
+            <p>Timetable for 1st Year 2nd Semester B.Sc. (Engg.) 2025 with effect from 1st February 2026</p>
+            <div class="cr-badge">
+                <i class="fas fa-user-tie"></i>
+                <span>Md. Mushfiqur Rahman Badol, CR7, DU EEE</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+        
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+            
+            // Save theme preference
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+        
+        // Group Selection Logic
+        const groupButtons = document.querySelectorAll('.group-btn');
+        
+        // Initialize selections
+        let selectedGroups = {
+            physics: 'A',
+            chemistry: 'A',
+            programming: 'A'
+        };
+        
+        // Load saved groups if available
+        const savedGroups = localStorage.getItem('routineGroups');
+        if (savedGroups) {
+            selectedGroups = JSON.parse(savedGroups);
+            updateGroupSelections();
+        }
+        
+        // Add click events to group buttons
+        groupButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const groupOption = this.closest('.group-option');
+                const groupType = groupOption.id.replace('Group', '').toLowerCase();
+                const selectedGroup = this.getAttribute('data-group');
+                
+                // Update selected groups
+                selectedGroups[groupType] = selectedGroup;
+                
+                // Update UI
+                updateGroupSelections();
+                
+                // Save to localStorage
+                localStorage.setItem('routineGroups', JSON.stringify(selectedGroups));
+                
+                // Enable generate routine button
+                document.getElementById('generateRoutine').disabled = false;
+            });
+        });
+        
+        function updateGroupSelections() {
+            // Update physics group
+            const physicsButtons = document.querySelectorAll('#physicsGroup .group-btn');
+            physicsButtons.forEach(btn => {
+                if (btn.getAttribute('data-group') === selectedGroups.physics) {
+                    btn.classList.add('selected');
+                    btn.closest('.group-option').classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            
+            // Update chemistry group
+            const chemistryButtons = document.querySelectorAll('#chemistryGroup .group-btn');
+            chemistryButtons.forEach(btn => {
+                if (btn.getAttribute('data-group') === selectedGroups.chemistry) {
+                    btn.classList.add('selected');
+                    btn.closest('.group-option').classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            
+            // Update programming group
+            const programmingButtons = document.querySelectorAll('#programmingGroup .group-btn');
+            programmingButtons.forEach(btn => {
+                if (btn.getAttribute('data-group') === selectedGroups.programming) {
+                    btn.classList.add('selected');
+                    btn.closest('.group-option').classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+        
+        // Routine Data
+        const routineData = {
+    sunday: {
+        '8:30 – 9:55': null,
+        '10:00 – 11:25': { code: '0533-PHY-1203', name: 'Optics', instructor: '', type: 'theory' },
+        '11:30 – 12:55': { code: '0533-PHY-1201', name: 'Modern Physics', instructor: 'SMM', type: 'theory' },
+        '1:30 – 3:00': { code: '0533-PHY-1204', name: 'Physics Laboratory', instructor: 'SMM, MJR', type: 'lab', group: 'A' },
+        '3:00 – 4:30': { code: '0533-PHY-1204', name: 'Physics Laboratory', instructor: 'SMM, MJR', type: 'lab', group: 'A' } // Spans two slots in image
+    },
+    monday: {
+        '8:30 – 9:55': { code: '0613-CSE-1205', name: 'Computer Programming', instructor: 'MNT', type: 'theory' },
+        '10:00 – 11:25': { code: '0531-CHE-1207', name: 'Chemistry', instructor: 'TUR', type: 'theory' },
+        '11:30 – 12:55': { code: '0533-PHY-1203', name: 'Optics', instructor: 'IHS', type: 'theory' },
+        '1:30 – 3:00': { code: '0613-CSE-1206', name: 'Computer Programming Laboratory', instructor: 'KA, MNT', type: 'lab', group: 'B' },
+        '3:00 – 4:30': { code: '0613-CSE-1206', name: 'Computer Programming Laboratory', instructor: 'KA, MNT', type: 'lab', group: 'B' }
+    },
+    tuesday: {
+        '8:30 – 9:55': { code: '0531-CHE-1208', name: 'Chemistry Laboratory', instructor: 'MR, MSZ', type: 'lab', group: 'B' },
+        '10:00 – 11:25': { code: '0531-CHE-1208', name: 'Chemistry Laboratory', instructor: 'MR, MSZ', type: 'lab', group: 'B' },
+        '11:30 – 12:55': null,
+        '1:30 – 3:00': { code: '0541-MAT-1209', name: 'Vector Calculus & Complex Analysis', instructor: 'MA', type: 'theory' },
+        '3:00 – 4:30': null
+    },
+    wednesday: {
+        '8:30 – 9:55': { code: '0541-MAT-1209', name: 'Vector Calculus & Complex Analysis', instructor: 'MA', type: 'theory' },
+        '10:00 – 11:25': { code: '0531-CHE-1207', name: 'Chemistry', instructor: 'TUR', type: 'theory' },
+        '11:30 – 12:55': { code: '0533-PHY-1201', name: 'Modern Physics', instructor: 'SMM', type: 'theory' },
+        '1:30 – 3:00': { code: '0613-CSE-1206', name: 'Computer Programming Laboratory', instructor: 'KA, MNT', type: 'lab', group: 'A' },
+        '3:00 – 4:30': { code: '0613-CSE-1206', name: 'Computer Programming Laboratory', instructor: 'KA, MNT', type: 'lab', group: 'A' }
+    },
+    thursday: {
+        '8:30 – 9:55': { code: '0613-CSE-1205', name: 'Computer Programming', instructor: 'MNT', type: 'theory' },
+        '10:00 – 11:25': { code: '0531-CHE-1208', name: 'Chemistry Laboratory', instructor: 'MR, MSZ', type: 'lab', group: 'A' },
+        '11:30 – 12:55': { code: '0531-CHE-1208', name: 'Chemistry Laboratory', instructor: 'MR, MSZ', type: 'lab', group: 'A' },
+        '1:30 – 3:00': { code: '0533-PHY-1204', name: 'Physics Laboratory', instructor: 'SMM, MJR', type: 'lab', group: 'B' },
+        '3:00 – 4:30': { code: '0533-PHY-1204', name: 'Physics Laboratory', instructor: 'SMM, MJR', type: 'lab', group: 'B' }
+    }
+};
+
+        
+        // Days order for display
+        const daysOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
+        const dayNames = {
+            'sunday': 'Sunday',
+            'monday': 'Monday', 
+            'tuesday': 'Tuesday',
+            'wednesday': 'Wednesday',
+            'thursday': 'Thursday'
+        };
+        
+        // Generate Routine
+        document.getElementById('generateRoutine').addEventListener('click', function() {
+            generateRoutine();
+            document.getElementById('downloadPDF').disabled = false;
+        });
+        
+        function generateRoutine() {
+            const routineBody = document.getElementById('routineBody');
+            routineBody.innerHTML = '';
+            
+            // Create rows for each day
+            daysOrder.forEach(day => {
+                const row = document.createElement('tr');
+                
+                // Day cell
+                const dayCell = document.createElement('td');
+                dayCell.className = 'day-cell';
+                dayCell.textContent = dayNames[day];
+                row.appendChild(dayCell);
+                
+                // Time slots for this day
+                const timeSlots = ['8:30 – 9:55', '10:00 – 11:25', '11:30 – 12:55', '1:30 – 3:00', '3:00 – 4:30'];
+                
+                timeSlots.forEach(timeSlot => {
+                    const cell = document.createElement('td');
+                    const classData = routineData[day][timeSlot];
+                    
+                    if (classData) {
+                        // Check if it's a lab class and if it matches the selected group
+                        if (classData.type === 'lab') {
+                            // Determine which lab this is based on course code
+                            let labType = '';
+                            if (classData.code.includes('PHY-1204')) labType = 'physics';
+                            else if (classData.code.includes('CHE-1208')) labType = 'chemistry';
+                            else if (classData.code.includes('CSE-1206')) labType = 'programming';
+                            
+                            // Only show if group matches
+                            if (labType && classData.group === selectedGroups[labType]) {
+                                const classCard = createClassCard(classData);
+                                cell.appendChild(classCard);
+                            } else {
+                                cell.innerHTML = '<div class="empty-slot">-</div>';
+                            }
+                        } else {
+                            // Theory class - show for everyone
+                            const classCard = createClassCard(classData);
+                            cell.appendChild(classCard);
+                        }
+                    } else {
+                        cell.innerHTML = '<div class="empty-slot">-</div>';
+                    }
+                    
+                    row.appendChild(cell);
+                });
+                
+                routineBody.appendChild(row);
+            });
+            
+            // Add a note about venues
+            const venueRow = document.createElement('tr');
+            venueRow.innerHTML = `
+                <td colspan="6" style="padding: 15px; background: rgba(37, 99, 235, 0.05); border-radius: 0 0 12px 12px; font-size: 14px; color: var(--text-secondary);">
+                    <i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--primary);"></i>
+                    <strong>Venues:</strong> Theory Classes: New Building (14th floor) | 
+                    Computer Programming Lab: New Building (14th floor) | 
+                    Physics Lab: New Building (14th floor) | 
+                    Chemistry Lab: ACCE Department
+                </td>
+            `;
+            routineBody.appendChild(venueRow);
+        }
+        
+        function createClassCard(classData) {
+            const card = document.createElement('div');
+            card.className = `class-card ${classData.type}`;
+            
+            const code = document.createElement('div');
+            code.className = 'class-code';
+            code.textContent = classData.code;
+            
+            const name = document.createElement('div');
+            name.className = 'class-name';
+            name.textContent = classData.name;
+            
+            const instructor = document.createElement('div');
+            instructor.className = 'class-instructor';
+            instructor.textContent = classData.instructor || 'Instructor TBA';
+            
+            // Add lab group badge if applicable
+            if (classData.type === 'lab' && classData.group) {
+                const groupBadge = document.createElement('div');
+                groupBadge.style.cssText = 'display: inline-block; background: rgba(245, 158, 11, 0.2); color: #f59e0b; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-top: 5px; font-weight: bold;';
+                groupBadge.textContent = `Group ${classData.group}`;
+                card.appendChild(groupBadge);
+            }
+            
+            card.appendChild(code);
+            card.appendChild(name);
+            card.appendChild(instructor);
+            
+            return card;
+        }
+        
+        // Download PDF functionality
+        document.getElementById('downloadPDF').addEventListener('click', function() {
+            downloadPDF();
+        });
+        
+        function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'mm', 'a4');
+    
+    // 1. Header Section
+    doc.setFontSize(16);
+    doc.setTextColor(37, 99, 235); // Primary Blue
+    doc.text('Department of Electrical & Electronic Engineering, DU', 20, 20);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(30, 41, 59); // Dark slate for better visibility
+    doc.text('1st Year 2nd Semester B.Sc. (Engg.) 2025 - Custom Routine', 20, 28);
+    doc.text(`Groups: Physics ${selectedGroups.physics}, Chemistry ${selectedGroups.chemistry}, Programming ${selectedGroups.programming}`, 20, 35);
+    
+    // 2. Table Configuration
+    const startY = 50;
+    const colWidths = [25, 45, 45, 45, 45, 45];
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+    // Ensuring the en-dash (–) matches your routineData object exactly
+    const timeSlots = ['8:30 – 9:55', '10:00 – 11:25', '11:30 – 12:55', '1:30 – 3:00', '3:00 – 4:30'];
+
+    // Draw Headers
+    doc.setFillColor(37, 99, 235);
+    doc.rect(20, startY, 250, 10, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.text('Day', 22, startY + 7);
+    timeSlots.forEach((slot, i) => {
+        doc.text(slot.replace(' – ', '-'), 20 + colWidths[0] + (i * colWidths[1]) + 5, startY + 7);
+    });
+
+    // 3. Content Rows
+    let currentY = startY + 10;
+    const rowHeight = 22; // Adjusted height for better spacing
+
+    days.forEach(dayName => {
+        const dayKey = dayName.toLowerCase();
+        
+        // Draw Day Cell
+        doc.setDrawColor(200, 200, 200);
+        doc.setTextColor(30, 41, 59);
+        doc.setFont("helvetica", "bold");
+        doc.rect(20, currentY, colWidths[0], rowHeight, 'S');
+        doc.text(dayName, 22, currentY + (rowHeight / 2) + 2);
+
+        timeSlots.forEach((slot, i) => {
+            const x = 20 + colWidths[0] + (i * colWidths[1]);
+            doc.rect(x, currentY, colWidths[1], rowHeight, 'S');
+            
+            const classData = routineData[dayKey][slot];
+            if (classData) {
+                // Visibility Logic
+                let shouldShow = classData.type === 'theory';
+                if (classData.type === 'lab') {
+                    const labType = classData.code.includes('PHY') ? 'physics' : 
+                                    classData.code.includes('CHE') ? 'chemistry' : 'programming';
+                    if (classData.group === selectedGroups[labType]) shouldShow = true;
+                }
+
+                if (shouldShow) {
+                    doc.setTextColor(0, 0, 0); // Black text for maximum visibility
+                    doc.setFontSize(8);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(classData.code, x + 2, currentY + 5);
+                    
+                    doc.setFont("helvetica", "bold");
+                    const nameLines = doc.splitTextToSize(classData.name, colWidths[1] - 5);
+                    doc.text(nameLines, x + 2, currentY + 10);
+                    
+                    doc.setFont("helvetica", "italic");
+                    doc.setFontSize(7);
+                    doc.setTextColor(37, 99, 235); // Instructor in blue
+                    doc.text(classData.instructor || 'TBA', x + 2, currentY + rowHeight - 3);
+                }
+            } else {
+                doc.setTextColor(150, 150, 150);
+                doc.text('-', x + (colWidths[1] / 2), currentY + (rowHeight / 2), { align: 'center' });
+            }
+        });
+        currentY += rowHeight;
+    });
+
+    // 4. Footer with your requested Venue Info
+    doc.setFontSize(8.5);
+    doc.setTextColor(100, 116, 139);
+    doc.setFont("helvetica", "normal");
+    const footerText = "Venues: Theory Classes: New Building (14th floor) | Computer Programming Lab: New Building (14th floor) | Physics Lab: New Building (14th floor) | Chemistry Lab: ACCE Department";
+    doc.text(footerText, 20, currentY + 10);
+
+    doc.save(`DU_EEE_Routine_${selectedGroups.physics}${selectedGroups.chemistry}${selectedGroups.programming}.pdf`);
+}
+        
+        // Initialize group selections UI
+        updateGroupSelections();
+    </script>
+</body>
+</html>
